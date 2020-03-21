@@ -17,7 +17,7 @@ import json
 from time import sleep
 import numpy as np
 import matplotlib.pyplot as plt
-
+from matplotlib.colors import ListedColormap
 
 # ---------------- UTILITIES ----------------
 def update_counter(color: int):
@@ -114,20 +114,45 @@ def dfs(v: dict, last_cmd: str):
 
 def print_map():
 
+    cmap = ListedColormap(['k', 'r', 'g', 'b', 'w'])
+
+    # liste che possono tornare utili per la generazione dell'istogramma nel caso le tengo, senno cambio c_s, che cosi non performa
     x_s = []
     y_s = []
+    c_s = []
 
     for el in visited:
         x_s.append(el["x"])
         y_s.append(el["y"])
+        if el["val"] == 82:
+            c_s.append("red")
+        elif el["val"] == 71:
+            c_s.append("green")
+        elif el["val"] == 66:
+            c_s.append("blue")
+        elif el["val"] == 32:
+            c_s.append("white")
 
-    matrix_plt = np.zeros((max(x_s), max(y_s)))
+    matrix_plt = np.zeros((max(x_s) + 1, max(y_s) + 1))
 
     for i in range(len(x_s)):
-        matrix_plt[x_s[i]-1,y_s[i]-1] = 1
+        col = 0
+        
+        if c_s[i] == "red":
+            col = 1
+        elif c_s[i] == "green":
+            col = 2
+        elif c_s[i] == "blue":
+            col = 3
+        elif c_s[i] == "white":
+            col = 4
+
+        matrix_plt[max(x_s) - x_s[i] + 1,max(y_s) - y_s[i] + 1] = col
 
 
-    plt.matshow(matrix_plt)
+    _ = plt.matshow(matrix_plt, cmap=cmap)
+    plt.xlim((0,max(y_s) - min(y_s)+2))
+    plt.ylim((max(x_s) - min(x_s)+2, 0))
     plt.show()
 
 
@@ -183,7 +208,7 @@ if __name__ == '__main__':
 
     print_map()
 
-    plot_statistic()
+    # plot_statistic()
 
     # Print statistics
     print(nodes_count)
