@@ -170,7 +170,8 @@ def preprocess_data_hist():
     x_colors = {}
     y_colors = {}
 
-    # molteplici riscritture, struttura di appoggio, necessaria per gestire i dati satellite durante il riordinamento, sfetchando ordinatamente nel popolamento delle liste di output
+    # molteplici riscritture, struttura di appoggio, necessaria per gestire i dati satellite durante il 
+    # riordinamento, sfetchando ordinatamente nel popolamento delle liste di output
     for el in visited:
 
         x_colors[el["x"]] = {
@@ -252,8 +253,6 @@ def color_histogram():
     x_s, x_red, x_green, x_blue, x_white, y_s, y_red, y_green, y_blue, y_white = preprocess_data_hist()
 
     fig, (ax1, ax2) = plt.subplots(1,2)
-
-    print(y_s)
 
     width = 0.2  # the width of the bars
 
@@ -349,6 +348,7 @@ if __name__ == '__main__':
     # quests
     print_map()
     color_histogram()
+    plot_statistic()
 
     # Print statistics
     print(nodes_count)
