@@ -170,7 +170,7 @@ def preprocess_data_hist():
     x_colors = {}
     y_colors = {}
 
-    # molteplici riscritture
+    # molteplici riscritture, struttura di appoggio, necessaria per gestire i dati satellite durante il riordinamento, sfetchando ordinatamente nel popolamento delle liste di output
     for el in visited:
 
         x_colors[el["x"]] = {
