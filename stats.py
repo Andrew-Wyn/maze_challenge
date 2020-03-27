@@ -19,19 +19,15 @@ def plot_map(visited):
     y_min = min(visited, key=lambda el:el['y'])['y']
     y_max = max(visited, key=lambda el:el['y'])['y']
 
-    # Create Matrix plot
-    matrix_plt = np.zeros((x_max + 1, y_max + 1))
+    matrix_plt = np.zeros((x_max - x_min + 1, y_max - y_min + 1))
     for el in visited:
         matrix_plt[
-            x_max - el["x"] + 1,
-            y_max - el["y"] + 1
+            x_max - x_min - (el["x"] - x_min),
+            y_max - y_min - (el["y"]- y_min)
         ] = colors_map[el["val"]]
 
     # Plotting the matrix
     plt.matshow(matrix_plt, cmap=cmap)
-
-    plt.xlim((0, y_max - y_min + 2))
-    plt.ylim((x_max - x_min + 2, 0))
     
     plt.show()
 
