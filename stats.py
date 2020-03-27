@@ -38,9 +38,9 @@ def plot_map(visited):
 
 def plot_colors_dist(nodes_count):
     """
-    Additional plot that shows colors distribution in the map
+    Additional plot that shows colors distribution in the map (not requested by any quest) 
     """
-    # Preare data
+    # Prepare data
     names = list(nodes_count.keys())
     values = list(nodes_count.values())
     colors = ['0.5', 'r', 'g', 'b']
@@ -50,12 +50,8 @@ def plot_colors_dist(nodes_count):
         names[i] += f"\n{values[i]}"
 
     # Plot
-    fig, axs = plt.subplots(1, 3, figsize=(9, 4), sharey=True)
-    axs[0].bar(names, values, color=colors)
-    axs[1].scatter(names, values)
-    axs[2].plot(names, values)
-    fig.suptitle("Colors distribution")
-
+    plt.bar(names, values, color=colors, align='center')
+    plt.suptitle("Colors distribution")
     plt.show()
 
 
