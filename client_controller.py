@@ -8,16 +8,16 @@ def on_press(key):
     Listen for input and move if a directional key or any of 'WASD' is pressed
     Exit if any other key is pressed
     """
-    key_repr = repr(key)[1:-1]
-    if key == keyboard.Key.up or key_repr == 'w':
+
+    if key == keyboard.Key.up or key.char == 'w':
         action = command.MOVE_UP
-    elif key == keyboard.Key.down or key_repr == 's':
+    elif key == keyboard.Key.down or key.char == 's':
         action = command.MOVE_DOWN
-    elif key == keyboard.Key.left or key_repr == 'a':
+    elif key == keyboard.Key.left or key.char == 'a':
         action = command.MOVE_LEFT
-    elif key == keyboard.Key.right or key_repr == 'd':
+    elif key == keyboard.Key.right or key.char == 'd':
         action = command.MOVE_RIGHT
-    elif key_repr == 'e':
+    elif key.char == 'e':
         action = command.GET_STATE
     else:
         return False
