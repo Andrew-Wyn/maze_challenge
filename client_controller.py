@@ -1,41 +1,36 @@
 # -*- coding: utf-8 -*-
-import mazeClient
-from getch import getch
+from mazeClient import Commands as command
+from mazeClient import send_command
+from pynput import keyboard
 
+def on_press(key):
+    """
+    Listen for input and move if a directional key or any of 'WASD' is pressed
+    Exit if any other key is pressed
+    """
+    key_repr = repr(key)[1:-1]
+    if key == keyboard.Key.up or key_repr == 'w':
+        action = command.MOVE_UP
+    elif key == keyboard.Key.down or key_repr == 's':
+        action = command.MOVE_DOWN
+    elif key == keyboard.Key.left or key_repr == 'a':
+        action = command.MOVE_LEFT
+    elif key == keyboard.Key.right or key_repr == 'd':
+        action = command.MOVE_RIGHT
+    elif key_repr == 'e':
+        action = command.GET_STATE
+    else:
+        return False
 
-def get_arrow_key():
-    # We are not interested in first two values
-
-    first_ch = ord(getch())
-
-    if first_ch == 113:
-        return command.EXIT
-    if first_ch != 27:
-        return None
-    if ord(getch()) != 91:
-        return None
-
-    input_char = ord(getch())
-
-    if input_char == 65:
-        return command.MOVE_UP
-    elif input_char == 66:
-        return command.MOVE_DOWN
-    elif input_char == 67:
-        return command.MOVE_RIGHT
-    elif input_char == 68:
-        return command.MOVE_LEFT
-    return None
-
-
-def main():
-    while True:
-        action = get_arrow_key()
-        mazeClient.send_command(action)
-        if action == command.EXIT:
-            break
+    res = send_command(action)
+    if action == command.GET_STATE:
+        print(res)
+    else:
+        print(action)
 
 
 if __name__ == "__main__":
-    command = mazeClient.Commands
-    main()
+    print("INSTRUCTIONS:\n\tWASD -> Move around the maze;\n\tE -> GET STATE;\n\tAny other Key: QUIT")
+    # Collect events until released
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
