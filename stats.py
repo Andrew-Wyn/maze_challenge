@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
 
-def plot_map(visited):
+def plot_map(visited: list):
     """
-    Plots the map constructing a matrix
+    Plots the map constructing a matrix.
+    Remember that x = row index, y = column index.
     """
     # Colors mapping for matshow library method
     colors_map = {82: 1, 71: 2, 66: 3, 32: 4}
@@ -22,17 +23,19 @@ def plot_map(visited):
     matrix_plt = np.zeros((x_max - x_min + 1, y_max - y_min + 1))
     for el in visited:
         matrix_plt[
-            x_max - x_min - (el["x"] - x_min),
-            y_max - y_min - (el["y"]- y_min)
+            x_max - el["x"],
+            y_max - el["y"]
         ] = colors_map[el["val"]]
 
     # Plotting the matrix
     plt.matshow(matrix_plt, cmap=cmap)
-    
+    plt.suptitle('Maze representation')
+    plt.xticks(range(0, y_max-y_min+1, 2), range(y_max, y_min-1, -2))
+    plt.yticks(range(0, x_max-x_min+1, 2), range(x_max, x_min-1, -2))
     plt.show()
 
 
-def plot_colors_dist(nodes_count):
+def plot_colors_dist(nodes_count: dict):
     """
     Additional plot that shows colors distribution in the map (not requested by any quest) 
     """
@@ -40,177 +43,106 @@ def plot_colors_dist(nodes_count):
     names = list(nodes_count.keys())
     values = list(nodes_count.values())
     colors = ['0.5', 'r', 'g', 'b']
-
-    # Concat values near names
-    for i in range(len(names)):
-        names[i] += f"\n{values[i]}"
+    total_cells = sum(nodes_count.values())
 
     # Plot
-    plt.bar(names, values, color=colors, align='center')
-    plt.suptitle("Colors distribution")
+    fig, ax = plt.subplots()
+    fig.suptitle(f"Colors distribution (total cells: {total_cells})")
+    rects = ax.bar(names, values, color=colors, align='center')
+
+    # Attach a text label above each bar in rects, displaying its height
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 1),  # 1 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
+
     plt.show()
 
 
-def plot_colors_xy_dist(past_plot: list, actual_plot: list):
+def plot_colors_xy_dist(maze: "Maze", past_maze: "Maze"):
     """
-    Bla bla
+    Plot a grouped bar chart that represents colors distribution on x and y
     """
-
-    def preprocess_data_hist(to_plot: list):
+    def preprocess_data_hist(colors_xy: tuple):
         """
-        Bla bla
+        Internal function that preprocess data for matplotlib
         """
-        x_colors = {}
-        y_colors = {}
+        colors_x, colors_y = colors_xy
 
-        # molteplici riscritture, struttura di appoggio, necessaria per gestire i dati satellite durante il 
-        # riordinamento, sfetchando ordinatamente nel popolamento delle liste di output
-        for el in to_plot:
-
-            x_colors[el["x"]] = {
-                'red':0,
-                'green':0,
-                'blue':0,
-                'white':0
-            }
-
-            y_colors[el["y"]] = {
-                'red':0,
-                'green':0,
-                'blue':0,
-                'white':0
-            }
-
-        for el in to_plot:
-
-            x = el["x"]
-            y = el["y"]
-
-            if el["val"] == 82:
-                x_colors[x]['red'] += 1
-                y_colors[y]['red'] += 1 # red
-            elif el["val"] == 71:
-                x_colors[x]['green'] += 1
-                y_colors[y]['green'] += 1 # green
-            elif el["val"] == 66:
-                x_colors[x]['blue'] += 1
-                y_colors[y]['blue'] += 1 # blue
-            elif el["val"] == 32:
-                x_colors[x]['white'] += 1
-                y_colors[y]['white'] += 1 # white
-
-        x_s = []
-        x_red = []
+        x_label = []
+        x_red   = []
         x_green = []
-        x_blue = []
+        x_blue  = []
         x_white = []
-
-        for key in sorted(x_colors):
-            x_s.append(key)
-            x_red.append(x_colors[key]["red"])
-            x_green.append(x_colors[key]["green"])
-            x_blue.append(x_colors[key]["blue"])
-            x_white.append(x_colors[key]["white"])
-
-        y_s = []
-        y_red = []
+        
+        y_label = []
+        y_red   = []
         y_green = []
-        y_blue = []
+        y_blue  = []
         y_white = []
 
-        for key in sorted(y_colors):
-            y_s.append(key)
-            y_red.append(y_colors[key]["red"])
-            y_green.append(y_colors[key]["green"])
-            y_blue.append(y_colors[key]["blue"])
-            y_white.append(y_colors[key]["white"])
+        for key in sorted(colors_x):
+            x_label.append(key)
+            x_red.append(colors_x[key]["red"])
+            x_green.append(colors_x[key]["green"])
+            x_blue.append(colors_x[key]["blue"])
+            x_white.append(colors_x[key]["white"])
+
+        for key in sorted(colors_y):
+            y_label.append(key)
+            y_red.append(colors_y[key]["red"])
+            y_green.append(colors_y[key]["green"])
+            y_blue.append(colors_y[key]["blue"])
+            y_white.append(colors_y[key]["white"])
+
+        return x_label, x_red, x_green, x_blue, x_white, y_label, y_red, y_green, y_blue, y_white
 
 
-        return x_s, x_red, x_green, x_blue, x_white, y_s, y_red, y_green, y_blue, y_white
+    def plot_axes(ax1, ax2, colors_xy, label="", width=0.2):
+        """
+        Internal function that plots colors distribution on given axes
+        Width is used to determine the width of each bar
+        """
+        # Preprocess data
+        x_label, x_red, x_green, x_blue, x_white, y_label, y_red, y_green, y_blue, y_white = preprocess_data_hist(colors_xy)
 
-    # nested function used only for this purpose
-    def autolabel(ax, rects):
-        """Attach a text label above each bar in *rects*, displaying its height."""
-        for rect in rects:
-            height = rect.get_height()
-            ax.annotate('{}'.format(height),
-                        xy=(rect.get_x() + rect.get_width() / 2, height),
-                        xytext=(0, 3),  # 3 points vertical offset
-                        textcoords="offset points",
-                        ha='center', va='bottom')
-
-    
-    fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2,2)
-
-    def plot_axes(ax1, ax2, to_plot):
-
-        if len(to_plot) == 0:
-            return
-
-        x_s, x_red, x_green, x_blue, x_white, y_s, y_red, y_green, y_blue, y_white = preprocess_data_hist(to_plot)
-
-        width = 0.2  # the width of the bars
-
-        # ---------------------- X
-
-        x = np.arange(len(x_s))  # the label locations
-
-        rect_red = ax1.bar(x - 3*width/2, x_red, width, label='Red', color="red")
-        rect_green = ax1.bar(x - width/2, x_green, width, label='Green', color="green")
-        rect_blue = ax1.bar(x + width/2, x_blue, width, label='Blue', color="blue")
-        rect_white = ax1.bar(x + 3*width/2, x_white, width, label='White', color="grey")
+        # Prepare bars for colors x distribution
+        x = np.arange(len(x_label))
+        ax1.bar(x - 3*width/2, x_red, width, label='Red', color="red")
+        ax1.bar(x - width/2, x_green, width, label='Green', color="green")
+        ax1.bar(x + width/2, x_blue, width, label='Blue', color="blue")
+        ax1.bar(x + 3*width/2, x_white, width, label='White', color="grey")
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax1.set_ylabel('Frequency')
-        ax1.set_title('Frequencies for X variable')
+        ax1.set_title(label + "X (rows)")
         ax1.set_xticks(x)
-        ax1.set_xticklabels(x_s)
-        ax1.legend()
+        ax1.set_xticklabels(x_label)
 
-        autolabel(ax1, rect_red)
-        autolabel(ax1, rect_blue)
-        autolabel(ax1, rect_green)
-        autolabel(ax1, rect_white)
-
-        leg = ax1.get_legend()
-        leg.legendHandles[0].set_color('red')
-        leg.legendHandles[1].set_color('green')
-        leg.legendHandles[2].set_color('blue')
-        leg.legendHandles[3].set_color('grey')
-
-
-        # ---------------------------Y
-
-        y = np.arange(len(y_s))  # the label locations
-
-        rect_red1 = ax2.bar(y - 3*width/2, y_red, width, label='Red', color="red")
-        rect_green1 = ax2.bar(y - width/2, y_green, width, label='Green', color="green")
-        rect_blue1 = ax2.bar(y + width/2, y_blue, width, label='Blue', color="blue")
-        rect_white1 = ax2.bar(y + 3*width/2, y_white, width, label='White', color="grey")
+        # Prepare bars for colors y distribution
+        y = np.arange(len(y_label))  # the label locations
+        ax2.bar(y - 3*width/2, y_red, width, label='Red', color="red")
+        ax2.bar(y - width/2, y_green, width, label='Green', color="green")
+        ax2.bar(y + width/2, y_blue, width, label='Blue', color="blue")
+        ax2.bar(y + 3*width/2, y_white, width, label='White', color="grey")
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax2.set_ylabel('Frequency')
-        ax2.set_title('Frequencies for Y variable')
+        ax2.set_title(label + "Y (cols)")
         ax2.set_xticks(y)
-        ax2.set_xticklabels(y_s)
-        ax2.legend()
-
-        autolabel(ax2, rect_red1)
-        autolabel(ax2, rect_blue1)
-        autolabel(ax2, rect_green1)
-        autolabel(ax2, rect_white1)
-
-        leg = ax2.get_legend()
-        leg.legendHandles[0].set_color('red')
-        leg.legendHandles[1].set_color('green')
-        leg.legendHandles[2].set_color('blue')
-        leg.legendHandles[3].set_color('grey')
+        ax2.set_xticklabels(y_label)
 
 
-    plot_axes(ax11, ax12, past_plot)
-    plot_axes(ax21, ax22, actual_plot)
-
-    # fig.tight_layout()
-    fig.set_size_inches(18.5, 10.5)
-
+    # Create figure, axes and then plot
+    if past_maze:
+        fig, ((ax11, ax12), (ax21, ax22)) = plt.subplots(2,2)
+        plot_axes(ax21, ax22, (past_maze.colors_x, past_maze.colors_y), label="PAST maze color distribution on ")
+    else:
+        fig, (ax11, ax12) = plt.subplots(1,2)
+    
+    fig.set_size_inches(12, 8)
+    plot_axes(ax11, ax12, (maze.colors_x, maze.colors_y), label="CURRENT maze color distribution on ")
     plt.show()

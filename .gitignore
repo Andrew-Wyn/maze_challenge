@@ -1,6 +1,9 @@
 # Project files
-past_stats.pickle
+past_maze.pickle
 Challenge_files/seed.maze
+
+# VsCode
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
