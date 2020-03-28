@@ -9,13 +9,16 @@ def on_press(key):
     Exit if any other key is pressed
     """
 
-    if key == keyboard.Key.up or key.char == 'w':
+
+    _key_ = keyboard.Key
+
+    if key == _key_.up or key.char == 'w':
         action = command.MOVE_UP
-    elif key == keyboard.Key.down or key.char == 's':
+    elif key == _key_.down or key.char == 's':
         action = command.MOVE_DOWN
-    elif key == keyboard.Key.left or key.char == 'a':
+    elif key == _key_.left or key.char == 'a':
         action = command.MOVE_LEFT
-    elif key == keyboard.Key.right or key.char == 'd':
+    elif key == _key_.right or key.char == 'd':
         action = command.MOVE_RIGHT
     elif key.char == 'e':
         action = command.GET_STATE
